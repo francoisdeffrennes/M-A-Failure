@@ -1,0 +1,95 @@
+Mode final | code hash 8a18c19d6666548c | events used (fyear <= 2022): 3,289
+Scored acquisitions 2017-2022: 1,569 | outcome known: 1,379 | failure rate 0.278 | training sizes {2017: 960, 2018: 1211, 2019: 1436, 2020: 1667, 2021: 1897, 2022: 2108}
+
+[Prediction] out-of-sample (higher AUC / avg precision better; lower Brier better):
+               AUC  avg_precision  brier  fail_rate_top20  fail_rate_bottom20
+Base rate    0.530          0.302  0.202            0.311               0.274
+Literature   0.694          0.437  0.191            0.489               0.116
+Logit (all)  0.707          0.494  0.180            0.533               0.127
+GBM          0.707          0.488  0.182            0.507               0.101
+AUC with 95% bootstrap intervals (an interval above 0.5 = better than chance):
+               AUC  ci_lo  ci_hi
+Literature   0.694  0.663  0.727
+Logit (all)  0.707  0.676  0.736
+GBM          0.707  0.676  0.736
+AUC differences with 95% bootstrap intervals:
+      model      versus  auc_diff  ci_lo  ci_hi
+ Literature   Base rate     0.164  0.119  0.207
+Logit (all)  Literature     0.013 -0.020  0.044
+        GBM  Literature     0.013 -0.020  0.045
+        GBM Logit (all)     0.000 -0.022  0.022
+
+Robustness - unknown outcomes treated as non-failures, AUC: {'Base rate': 0.529, 'Literature': 0.682, 'Logit (all)': 0.689, 'GBM': 0.691}
+Robustness - failure = impairment >= 25% of goodwill, AUC: {'Base rate': 0.555, 'Literature': 0.715, 'Logit (all)': 0.725, 'GBM': 0.717}
+Share of impairment losses (as % of assets) in the riskiest 20% of deals (no skill = 0.20): {'Literature': np.float64(0.466), 'Logit (all)': np.float64(0.444), 'GBM': np.float64(0.39)}
+
+Secondary label fail_mkt: scored 1,094, failure rate 0.590
+               AUC  avg_precision  brier  fail_rate_top20  fail_rate_bottom20
+Base rate    0.597          0.668  0.263            0.688               0.526
+Literature   0.536          0.627  0.265            0.635               0.598
+Logit (all)  0.555          0.626  0.273            0.607               0.507
+GBM          0.539          0.613  0.287            0.607               0.539
+
+Secondary label fail_any: scored 1,226, failure rate 0.675
+               AUC  avg_precision  brier  fail_rate_top20  fail_rate_bottom20
+Base rate    0.546          0.715  0.227            0.707               0.647
+Literature   0.574          0.731  0.227            0.760               0.642
+Logit (all)  0.619          0.761  0.228            0.776               0.537
+GBM          0.596          0.749  0.237            0.776               0.589
+
+[Drivers] permutation importance (drop in AUC when the feature is shuffled):
+valuation        0.0564
+sector           0.0342
+gw_assets        0.0235
+gw_share         0.0191
+ocf_assets       0.0188
+prior_impair     0.0183
+log_assets       0.0160
+intang_assets    0.0140
+rev_growth       0.0110
+roa              0.0106
+acq_size         0.0071
+op_margin        0.0064
+cash_assets      0.0050
+gw_equity        0.0031
+stock_share      0.0023
+serial           0.0016
+leverage         0.0009
+Logit coefficients (standardised; positive = raises failure risk):
+gw_assets       -0.451
+valuation       -0.324
+cash_assets     -0.279
+roa             -0.191
+log_assets      -0.164
+ocf_assets      -0.118
+serial          -0.070
+leverage        -0.059
+acq_size         0.040
+intang_assets    0.056
+rev_growth       0.077
+op_margin        0.078
+stock_share      0.102
+gw_equity        0.158
+gw_share         0.162
+prior_impair     0.294
+Failure rate by GBM risk quintile: {1: 0.101, 2: 0.178, 3: 0.273, 4: 0.333, 5: 0.507}
+
+[Economic value] acquirers with a Yahoo price series: 1,105 of 1,569 (70%); failure rate with prices 0.233 vs without 0.460
+Calendar-time portfolios 2017-09 -> 2026-08, hold 36 months, cost 20 bps per trade:
+                               months  ann_return  ann_vol  sharpe  max_drawdown  alpha_ann  alpha_t   beta
+Low risk [Literature]           107.0       0.099    0.221   0.423        -0.322     -0.059   -2.273  1.200
+High risk [Literature]          108.0       0.113    0.308   0.414        -0.397     -0.061   -1.065  1.462
+Avoid high risk [Literature]    107.0       0.088    0.221   0.380        -0.315     -0.069   -2.523  1.199
+Low - High [Literature]         107.0      -0.060    0.193  -0.209        -0.642     -0.006   -0.095 -0.267
+Low risk [Logit (all)]          107.0       0.125    0.224   0.524        -0.317     -0.038   -1.361  1.225
+High risk [Logit (all)]         108.0       0.079    0.287   0.316        -0.397     -0.083   -1.760  1.350
+Avoid high risk [Logit (all)]   107.0       0.120    0.228   0.501        -0.310     -0.046   -1.779  1.258
+Low - High [Logit (all)]        107.0       0.006    0.169   0.125        -0.318      0.038    0.875 -0.129
+All acquirers                   108.0       0.108    0.237   0.444        -0.311     -0.060   -2.185  1.281
+Low risk [GBM]                  107.0       0.137    0.234   0.555        -0.297     -0.030   -1.039  1.255
+High risk [GBM]                 108.0       0.102    0.289   0.390        -0.388     -0.065   -1.361  1.381
+Avoid high risk [GBM]           107.0       0.112    0.229   0.470        -0.307     -0.052   -2.120  1.258
+Low - High [GBM]                107.0      -0.005    0.176   0.064        -0.318      0.028    0.641 -0.131
+Market (US)                     108.0       0.150    0.167   0.774        -0.248      0.000      NaN  1.000
+
+Saved to /home/claude/ma-failure/outputs/final
