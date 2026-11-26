@@ -1,0 +1,6 @@
+,0
+Literature,0.535
+Logit (all),0.532
+GBM,0.554
+GBM tuned,0.549
+Logit (all) tuned,0.547

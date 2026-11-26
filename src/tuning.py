@@ -119,6 +119,8 @@ def main():
     print(flag.round(3).to_string())
     log.to_csv(OUT / "chosen_settings.csv", index=False)
     aucs.to_csv(OUT / "auc_tuned_vs_fixed.csv")
+    # all Table 1 columns (AUC, average precision, Brier, failure rate in riskiest / safest fifth)
+    md.scores(d, ["Base rate"] + models).to_csv(OUT / "table1_scores.csv")
     diffs.to_csv(OUT / "auc_differences.csv", index=False)
     by_year.to_csv(OUT / "auc_by_year.csv")
     flag.to_csv(OUT / "flag_rule.csv")

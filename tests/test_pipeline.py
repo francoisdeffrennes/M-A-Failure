@@ -5,6 +5,7 @@
 3. Risk cut-offs come from training predictions (the alert threshold is known at the decision date).
 4. BHAR with delisting: after the last return, the money earns the market return.
 5. Tuning never looks at the test year.
+6. Corrected (real-time) design: every training label was public before the scored deal's filing month.
 """
 import sys
 from pathlib import Path
@@ -84,10 +85,33 @@ def test_tuning_no_test_year():
     print("ok  tuning: settings chosen without the test year")
 
 
+def test_realtime_labels_public():
+    f = ROOT / "outputs" / "corrected" / "predictions_final.csv"
+    if not f.exists():
+        print("skip real-time check: run realtime.py first")
+        return
+    import realtime
+    from run_all import load
+    ev = load()
+    ev = ev[ev["fyear"] <= 2022].copy()
+    ev["filed_dt"] = pd.to_datetime(ev["filed"])
+    ev["resolved"] = realtime.resolved_dates(ev)
+    worst = pd.Timedelta(days=-100000)
+    for Y in (2017, 2020, 2022):
+        te = ev[ev["fyear"] == Y]
+        for month in te["filed_dt"].dt.to_period("M").unique():
+            tr = realtime.train_set(ev, Y, month.start_time)
+            gap = tr["resolved"].max() - month.start_time
+            assert gap < pd.Timedelta(0), "a training label resolved after the decision date"
+            worst = max(worst, gap)
+    print(f"ok  real-time design: latest training label resolved {-worst.days} days before the decision month")
+
+
 if __name__ == "__main__":
     test_training_window()
     test_prep_fitted_on_train_only()
     test_saved_predictions()
     test_bhar_delisting()
     test_tuning_no_test_year()
+    test_realtime_labels_public()
     print("all checks passed")

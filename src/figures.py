@@ -1,5 +1,6 @@
-"""Step 9 - Figures for the manuscript and the presentation (outputs/figures/*.png).
-Reads only saved outputs; run after run_all.py, stock_test.py, losses_avoided.py and tuning.py."""
+"""Step 12 - Figures for the manuscript and the presentation (outputs/figures/*.png).
+Reads only saved outputs. Figures 1, 2, 4 and 5 use the corrected (real-time) predictions of realtime.py and
+corrected_results.py; Figure 3 uses the deals' characteristics and outcomes only."""
 from pathlib import Path
 
 import matplotlib
@@ -23,9 +24,7 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10, "axes.edgeco
 
 
 def final_with_tuned():
-    base = pd.read_csv(ROOT / "outputs" / "final" / "predictions.csv")
-    tuned = pd.read_csv(ROOT / "outputs" / "tuning" / "tuned_predictions.csv")
-    return base.merge(tuned, on=["cik", "fyear", "accn"], how="left", validate="1:1")
+    return pd.read_csv(ROOT / "outputs" / "corrected" / "predictions_final.csv")
 
 
 def save(fig, name):
@@ -108,8 +107,7 @@ def fig_flag(k):
 
 
 def fig_bhar():
-    t = pd.read_csv(ROOT / "outputs" / "stock_test" / "bhar_by_tercile.csv")
-    t = t[t["sample"] == "All (Yahoo + Bloomberg)"].set_index("tercile").loc[["Low risk", "Middle", "High risk"]]
+    t = pd.read_csv(ROOT / "outputs" / "corrected" / "bhar_by_tercile.csv").set_index("tercile").loc[["Low risk", "Middle", "High risk"]]
     fig, ax = plt.subplots(figsize=(6, 3.6))
     x = np.arange(3)
     w = 0.36
@@ -122,14 +120,14 @@ def fig_bhar():
     ax.axhline(0, color=INK2, lw=1)
     ax.set_xticks(x)
     ax.set_xticklabels(["Low risk", "Middle", "High risk"])
-    ax.set_xlabel("Predicted risk tercile (GBM, declared test)")
+    ax.set_xlabel("Predicted risk tercile (GBM, as in the declared test)")
     ax.set_ylabel("3-year return vs US market")
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1))
     ax.set_ylim(-0.48, 0.05)
     ax.grid(axis="y", color=GRID)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=8.5)
-    ax.set_title("Acquirers' stock performance after the deal, 2014-2022 (n = 2,067)")
+    ax.set_title(f"Acquirers' stock performance after the deal, 2014-2022 (n = {int(t['count'].sum()):,})")
     save(fig, "fig5_bhar_by_tercile.png")
 
 

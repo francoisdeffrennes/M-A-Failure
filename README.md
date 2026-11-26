@@ -6,14 +6,21 @@ Capstone project, AI for Finance (Prof. Josep Gisbert), Type A: free application
 acquisition will end in a goodwill impairment (the accounting trace of synergies that did not materialise), and which
 losses would such a warning have flagged?
 
-**Answer (locked out-of-sample test, acquisitions of fiscal 2017-2022, 1,379 deals).**
+**Answer (out-of-sample test, acquisitions of fiscal 2017-2022, 1,379 deals, real-time design).**
 
 | | Result |
 | --- | --- |
-| Ranking quality (AUC), regularised logistic model | 0.727 [0.697, 0.755] vs 0.694 for the literature benchmark (difference +0.034 [+0.005, +0.060]) |
-| Failure rate, safest to riskiest fifth | 10% -> 15% -> 25% -> 33% -> 56% |
-| Alert rule (flag the top third by past deals) | flags 38% of deals, catches 60% of failures and $143bn of $286bn of impairments |
-| Stock market (2,067 deals, 2014-2022) | median riskiest vs safest: -27 pts over 3 years (p = 0.002, exploratory); declared mean test: -8 pts (p = 0.28) |
+| Ranking quality (AUC), regularised logistic model | 0.700 [0.668, 0.730]; literature benchmark 0.696 (difference +0.004 [-0.028, +0.035], not significant) |
+| Failure rate, safest to riskiest fifth | 11% -> 20% -> 23% -> 36% -> 50% |
+| Alert rule (flag the top third by past deals) | flags 37% of deals, catches 58% of failures and $117bn of $286bn of impairments; flagged deals fail 2.3x as often |
+| Stock market (2,067 deals, 2014-2022) | median riskiest vs safest: -23 pts over 3 years (p = 0.004, exploratory); declared mean test: -8 pts (p = 0.28) |
+
+**Audit note.** The pre-registered run trained the model for fiscal year Y on all deals of years <= Y-3. A final audit
+found that 4-10% of those training labels were filed after some year-Y deals were reported (look-ahead). The main
+results now use `realtime.py`: every deal is scored by a model trained only on outcomes public before the month its
+10-K was filed. The pre-registered run (AUC 0.707 for gradient boosting; 0.727 for a tuned logistic model, +0.034 over
+the literature) is kept in `outputs/final`, `outputs/tuning` for transparency; its advantage over the literature does
+not survive the correction.
 
 The manuscript gives the full analysis, the benchmarks and the limitations.
 
@@ -34,10 +41,14 @@ src/                     all code, one script per step (each file starts with a 
   merge_bloomberg.py        name and date checks, Bloomberg monthly returns
   stock_test.py          6  declared stock-market test (STOCK_TEST_PLAN.md)
   stock_test_median.py      exploratory median regression
-  tuning.py              7  hyperparameters chosen by time-series CV inside each training window
-  losses_avoided.py      8  alert rule for the acquirer, case studies
-  figures.py             9  Figures 1-5
-tests/test_pipeline.py      checks: no look-ahead, training-only preprocessing, BHAR with delisting, tuning
+  market_checks.py          descriptive market checks, Table 3 re-derived from event-level returns
+  tuning.py              7  pre-registered design with hyperparameters chosen by time-series CV
+  losses_avoided.py      8  alert rule and case studies (pre-registered design)
+  robustness_lag.py         robustness: training on deals <= Y-4
+  realtime.py            9  CORRECTED real-time walk-forward (main results)
+  corrected_results.py  10  Tables 1-4, alert rule, case studies, stock tests on the corrected predictions
+  figures.py            11  Figures 1-5
+tests/test_pipeline.py      checks: real-time labels, training windows, training-only preprocessing, BHAR, tuning
 PREREGISTRATION.md          hypotheses, models and settings frozen before the final test (code hash 8a18c19d6666548c)
 STOCK_TEST_PLAN.md          stock test declared before the Bloomberg data were downloaded
 outputs/                    every result table (CSV), console logs and figures used in the manuscript
@@ -61,7 +72,7 @@ but the gradient-boosting results can move slightly (for example, AUC 0.702 inst
 scikit-learn); the logistic models and the literature benchmark are unaffected.
 
 Steps 1-4 need only free data and an internet connection (about 1.4 GB from the SEC). Everything runs on a laptop:
-building the dataset takes about an hour, the models seconds, the tuning about two minutes.
+building the dataset takes under an hour; the models, tuning and real-time walk-forward take a few minutes.
 
 ### Data sources
 
@@ -76,6 +87,8 @@ building the dataset takes about an hour, the models seconds, the tuning about t
 The Bloomberg prices are not redistributed. `outputs/bloomberg_template.xlsx` re-downloads them on any Bloomberg
 terminal (save the filled file as `data/bloomberg/bloomberg_prices.xlsx`). Without it, the stock test runs on Yahoo
 prices only, which covers 63% of deals instead of 85% and is biased toward surviving acquirers.
+`outputs/stock_test/stock_test_events.csv` holds the event-level three-year returns (derived values, no prices), so
+`src/market_checks.py` reproduces Table 3's pre-registered rows without Bloomberg access.
 Yahoo prices are re-downloaded at run time, so the stock-market figures can move slightly if Yahoo revises its history.
 
 ### One-shot tests
@@ -86,11 +99,11 @@ reproduced; forced runs are logged as such.
 
 ## Timing rule (why there is no look-ahead)
 
-A prediction for an acquisition of fiscal year Y is made when the acquirer files its 10-K for Y (early Y+1).
-At that date only acquisitions of years <= Y-3 have a known three-year outcome, so each year's model is trained on
-those only. Features use facts as first reported, preprocessing is fitted on training rows, alert thresholds come
-from training predictions, and tuning uses validation years inside the training window. `tests/test_pipeline.py`
-checks these rules.
+A deal's outcome is known only when the company has filed its 10-K three fiscal years later. In the main design
+(`realtime.py`) each deal is scored by a model trained only on deals whose outcome had been filed before the first day
+of the month in which the deal's own 10-K was filed. Features use facts as first reported, preprocessing is fitted on
+training rows, alert thresholds come from training predictions, and tuning uses validation years whose labels were
+also public at the decision date. `tests/test_pipeline.py` checks these rules.
 
 ## Use of generative AI
 

@@ -27,5 +27,9 @@ python src/stock_test.py --force     # 6a. declared stock-market test (once; --f
 python src/stock_test_median.py      # 6b. exploratory median regression -> Table 3
 python src/tuning.py                 # 7. hyperparameters chosen inside each training window -> Table 1
 python src/losses_avoided.py         # 8. alert rule and case studies -> Table 2
-python src/figures.py                # 9. Figures 1-5
-python tests/test_pipeline.py        # 10. checks: no look-ahead, training-only preprocessing, BHAR, tuning
+python src/market_checks.py          # 9. descriptive market checks quoted in the manuscript
+python src/robustness_lag.py         # 10. robustness: training on deals <= Y-4
+python src/realtime.py               # 11. CORRECTED real-time walk-forward (main results after the audit)
+python src/corrected_results.py      # 12. Tables 1-3 and case studies on the corrected predictions
+python src/figures.py                # 13. Figures 1-5
+python tests/test_pipeline.py        # 14. checks: no look-ahead, real-time labels, preprocessing, BHAR, tuning
