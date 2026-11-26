@@ -1,0 +1,10 @@
+# Raw and downloaded data are rebuilt by the code (run_everything.sh)
+data/
+# Licensed Bloomberg data and anything containing Bloomberg fields: never published
+*bloomberg_prices*.xlsx
+outputs/bloomberg_name_check.csv
+# Run locks are local guards against re-running the one-shot tests
+.run_lock
+__pycache__/
+*.pyc
+.DS_Store

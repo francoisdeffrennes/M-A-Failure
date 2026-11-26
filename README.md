@@ -46,10 +46,19 @@ run_everything.sh           reproduces everything in order
 
 ## How to reproduce
 
+In Google Colab: open `MA_failure_colab.ipynb` (File > Open notebook > GitHub) and run the cells.
+On a computer:
+
 ```bash
+git clone https://github.com/francoisdeffrennes/M-A-Failure.git
+cd M-A-Failure
 pip install -r requirements.txt
 ./run_everything.sh
 ```
+
+`requirements.txt` pins the exact library versions used for the manuscript. With other versions everything runs,
+but the gradient-boosting results can move slightly (for example, AUC 0.702 instead of 0.707 with an older
+scikit-learn); the logistic models and the literature benchmark are unaffected.
 
 Steps 1-4 need only free data and an internet connection (about 1.4 GB from the SEC). Everything runs on a laptop:
 building the dataset takes about an hour, the models seconds, the tuning about two minutes.

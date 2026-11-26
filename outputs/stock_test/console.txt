@@ -1,0 +1,32 @@
+Out-of-sample deals: 2,446 | with a BHAR36: 2,067 (85%) | Yahoo 1,550 + Bloomberg 517
+Deals whose stock stopped trading within 36 months (proceeds reinvested in the market): 188
+Accounting failure rate: deals with a BHAR 0.236 | without 0.534
+
+[Declared test] BHAR36 on GBM risk percentile, fiscal-year FE, SE clustered by entry month (106 clusters):
+  coefficient -0.083 (riskiest vs safest deal), SE 0.076, 95% CI [-0.232, +0.066], two-sided p = 0.2751, N = 2,067
+
+All (Yahoo + Bloomberg): mean BHAR36 by risk tercile
+            mean  median  count  share_bhar_below_-20%
+tercile
+Low risk  -0.133  -0.197    722                  0.497
+Middle    -0.136  -0.287    701                  0.546
+High risk -0.162  -0.367    644                  0.575
+  High - Low mean difference: -0.029
+
+Yahoo only (survivors): mean BHAR36 by risk tercile
+            mean  median  count  share_bhar_below_-20%
+tercile
+Low risk  -0.127  -0.202    546                  0.502
+Middle    -0.137  -0.295    529                  0.552
+High risk -0.175  -0.382    475                  0.581
+  High - Low mean difference: -0.048
+
+Bloomberg-added only: mean BHAR36 by risk tercile
+            mean  median  count  share_bhar_below_-20%
+tercile
+Low risk  -0.152  -0.169    176                  0.483
+Middle    -0.134  -0.254    172                  0.529
+High risk -0.126  -0.362    169                  0.556
+  High - Low mean difference: +0.026
+
+Run 1 (outputs/stock_test_run1_bug), before fixing the Bloomberg forward-filled prices: coefficient -0.091, p = 0.237.
